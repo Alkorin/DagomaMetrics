@@ -8,6 +8,17 @@ static volatile uint8_t bufferHead = 0;
 static volatile uint8_t bufferTail = 0;
 static volatile uint8_t buffer[BUFFER_SIZE];
 
+static const uint8_t thermometerFont[8] = {
+  B00100,
+  B01010,
+  B01010,
+  B01010,
+  B10001,
+  B10001,
+  B01110,
+  B00000,
+};
+
 static uint8_t bufferAvailable() {
   uint8_t head = bufferHead;
   uint8_t tail = bufferTail;
@@ -52,7 +63,8 @@ void yield() {
 
 void setup() {
   Serial.begin(9600); // USB is always 12 Mbit/sec
-   
+
+  vfd.setCustomCharacterFont(0, thermometerFont);
   vfd.writeString (" Disco Easy Metrics ");
   vfd.writeString ("        v0.2        ");
   vfd.show();
@@ -175,7 +187,7 @@ void loop(void) {
       needUpdate = false;
 
       vfd.clearScreen();
-      sprintf(buf, "T:%d/%d L:%d/%d", currTemp, wantedTemp, currLayer+1, totalLayer);
+      sprintf(buf, "\x8%d\x1A L:%d/%d", currTemp, currLayer+1, totalLayer);
       vfd.writeString(buf);
       sprintf(buf, "L:%.01f%% P:%.01f%% - %d", 100*layerPrintTime/(float)layerTotalTime, 100*printTime/(float)totalTime, durty);
       vfd.setPos(1,0);
